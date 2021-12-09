@@ -3,7 +3,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins, permissions
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.viewsets import GenericViewSet, ModelViewSet
+from rest_framework import viewsets
 from posts.models import Follow, Group, Post
 from .serializer import (
     PostSerializer, GroupSerializer, CommentSerializer, FollowSerializer
@@ -11,7 +11,7 @@ from .serializer import (
 from .permissions import IsOwnerOrReadOnly
 
 
-class PostViewSet(ModelViewSet):
+class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     permission_classes = [
@@ -24,15 +24,13 @@ class PostViewSet(ModelViewSet):
         serializer.save(author=self.request.user)
 
 
-class GroupViewSet(mixins.ListModelMixin,
-                   mixins.RetrieveModelMixin,
-                   GenericViewSet):
+class GroupViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
     permission_classes = [IsOwnerOrReadOnly]
 
 
-class CommentViewSet(ModelViewSet):
+class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = [
         permissions.IsAuthenticatedOrReadOnly,
@@ -54,7 +52,7 @@ class CommentViewSet(ModelViewSet):
 
 class FollowViewSet(mixins.CreateModelMixin,
                     mixins.ListModelMixin,
-                    GenericViewSet):
+                    viewsets.GenericViewSet):
     queryset = Follow.objects.all()
     serializer_class = FollowSerializer
     permission_classes = [permissions.IsAuthenticated]
